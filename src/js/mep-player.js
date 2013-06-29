@@ -559,6 +559,7 @@
 							//console.log('media clicked', t.media, t.media.paused);
 
 							if (t.options.clickToPlayPause) {
+								bigPlayPauseClicked = true;
 								if (t.media.paused) {
 									t.media.play();
 								} else {
@@ -875,6 +876,7 @@
 
 			media.addEventListener('play',function() {
 				poster.hide();
+				$('.mejs-interactive-play-button').removeClass('mejs-interactive-play-button');
 			}, false);
 
 			if(player.options.showPosterWhenEnded && player.options.autoRewind){
@@ -915,21 +917,35 @@
 				'</div>')
 				.hide() // start out hidden
 				.appendTo(layers),
+			bigPlayPosterClass = $(layers).find('.mejs-poster').length > 0 ? ' mejs-interactive-play-button' : '',
 			// this needs to come last so it's on top
-			bigPlay =
-				$('<div class="mejs-overlay mejs-layer mejs-overlay-play">'+
-					'<div class="mejs-overlay-button"></div>'+
+			bigPlayPause =
+				$('<div class="mejs-overlay mejs-layer mejs-overlay-play-pause">'+
+					'<div class="mejs-overlay-button mejs-overlay-button-play' + bigPlayPosterClass + '"></div>'+
+					'<div class="mejs-overlay-button mejs-overlay-button-pause"></div>'+
 				'</div>')
 				.appendTo(layers)
 				.click(function() {
-                    if (t.options.clickToPlayPause) {
-                        if (media.paused) {
-                            media.play();
-                        } else {
-                            media.pause();
-                        }
-                    }
-				});
+          if (t.options.clickToPlayPause) {
+						bigPlayPauseClicked = true;
+            if (media.paused) {
+                media.play();
+            } else {
+                media.pause();
+            }
+          }
+				}),
+				bigPlayPauseClicked = false,
+				tweenBigPlayPauseButton = function animateBigPlayPauseButton(btn_string) {
+					var button = bigPlayPause.find('.mejs-overlay-button.mejs-overlay-button-' + btn_string);
+					TweenLite.killTweensOf(button);
+					TweenLite.set(button, {css: {opacity: 1, scale: 0.7, visibility: 'visible', display: 'block'}});
+					TweenLite.to(button, 0.9, {css: {opacity: 0, scale: 1}, ease: Circ.easeInOut, onComplete: onBigPlayPauseButtonTweenComplete, onCompleteParams: [button]});
+				},
+				onBigPlayPauseButtonTweenComplete = function onBigPlayPauseButtonTweenComplete(button) {
+					$(button).css({'visibility': 'hidden', 'display': 'block'});
+				};
+
 
 			/*
 			if (mejs.MediaFeatures.isiOS || mejs.MediaFeatures.isAndroid) {
@@ -941,14 +957,16 @@
 
 			// show/hide big play button
 			media.addEventListener('play',function() {
-				bigPlay.hide();
+				if (bigPlayPauseClicked) {
+					tweenBigPlayPauseButton('play');
+					bigPlayPauseClicked = false;
+				}
 				loading.hide();
 				controls.find('.mejs-time-buffering').hide();
 				error.hide();
 			}, false);
 
 			media.addEventListener('playing', function() {
-				bigPlay.hide();
 				loading.hide();
 				controls.find('.mejs-time-buffering').hide();
 				error.hide();
@@ -965,8 +983,9 @@
 			}, false);
 
 			media.addEventListener('pause',function() {
-				if (!mejs.MediaFeatures.isiPhone) {
-					bigPlay.show();
+				if (!mejs.MediaFeatures.isiPhone && bigPlayPauseClicked) {
+					tweenBigPlayPauseButton('pause');
+					bigPlayPauseClicked = false;
 				}
 			}, false);
 
