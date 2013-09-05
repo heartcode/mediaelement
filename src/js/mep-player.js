@@ -962,23 +962,27 @@
 					bigPlayPauseClicked = false;
 				}
 				loading.hide();
+				loading.removeClass('is-loading');
 				controls.find('.mejs-time-buffering').hide();
 				error.hide();
 			}, false);
 
 			media.addEventListener('playing', function() {
 				loading.hide();
+				loading.removeClass('is-loading');
 				controls.find('.mejs-time-buffering').hide();
 				error.hide();
 			}, false);
 
 			media.addEventListener('seeking', function() {
 				loading.show();
+				loading.addClass('is-loading');
 				controls.find('.mejs-time-buffering').show();
 			}, false);
 
 			media.addEventListener('seeked', function() {
 				loading.hide();
+				loading.removeClass('is-loading');
 				controls.find('.mejs-time-buffering').hide();
 			}, false);
 
@@ -991,6 +995,7 @@
 
 			media.addEventListener('waiting', function() {
 				loading.show();
+				loading.addClass('is-loading');
 				controls.find('.mejs-time-buffering').show();
 			}, false);
 
@@ -1002,16 +1007,19 @@
 				//	return;
 
 				loading.show();
+				loading.addClass('is-loading');
 				controls.find('.mejs-time-buffering').show();
 			}, false);
 			media.addEventListener('canplay',function() {
 				loading.hide();
+				loading.removeClass('is-loading');
 				controls.find('.mejs-time-buffering').hide();
 			}, false);
 
 			// error handling
 			media.addEventListener('error',function() {
 				loading.hide();
+				loading.removeClass('is-loading');
 				controls.find('.mejs-time-buffering').hide();
 				error.show();
 				error.find('mejs-overlay-error').html("Error loading this resource");
